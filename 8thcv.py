@@ -1,33 +1,34 @@
 import cv2
 import numpy as np
 
-# 1. Load the image
-image = cv2.imread('image1.png')
+# Load the image
+image_path = "image.jpg"  # Replace with the path to your image
+img = cv2.imread(image_path)
 
-# 2. Rotate the image
-angle = 45  # Rotate the image 45 degrees
-center = (image.shape[1] // 2, image.shape[0] // 2)  # Image center
-rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)  # Scale = 1.0
-rotated_image = cv2.warpAffine(image, rotation_matrix, (image.shape[1], image.shape[0]))
+# Check if the image is loaded successfully
+if img is None:
+    print(f"Error: Unable to load image '{image_path}'. Please check the file path.")
+    exit()
 
-# 3. Scale the image
-scale_percent = 50  # Scale the image to 25% of its size
-width = int(image.shape[1] * scale_percent / 100)
-height = int(image.shape[0] * scale_percent / 100)
-dim = (width, height)
-scaled_image = cv2.resize(image, dim)
+# Get the image dimensions
+height, width, _ = img.shape
 
-# 4. Translate the image
-tx, ty = 100, 150  # Translate the image 100 pixels right and 50 pixels down
-translation_matrix = np.float32([[1, 0, tx], [0, 1, ty]])
-translated_image = cv2.warpAffine(image, translation_matrix, (image.shape[1], image.shape[0]))
+# Define the transformation matrices
+rotation_matrix = cv2.getRotationMatrix2D((width/2, height/2), 45, 1)  # Rotate by 45 degrees
+scaling_matrix = np.float32([[1.5, 0, 0], [0, 1.5, 0]])  # Scale by 1.5x
+translation_matrix = np.float32([[1, 0, 100], [0, 1, 50]])  # Translate by (100, 50)
 
-# 5. Display the images
-cv2.imshow('Original Image', image)
-cv2.imshow('Rotated Image', rotated_image)
-cv2.imshow('Scaled Image', scaled_image)
-cv2.imshow('Translated Image', translated_image)
+# Apply transformations
+rotated_img = cv2.warpAffine(img, rotation_matrix, (width, height))
+scaled_img = cv2.warpAffine(img, scaling_matrix, (int(width*1.5), int(height*1.5)))
+translated_img = cv2.warpAffine(img, translation_matrix, (width, height))
 
-# Wait for a key press and close the windows
+# Display the original and transformed images
+cv2.imshow("Original Image", img)
+cv2.imshow("Rotated Image", rotated_img)
+cv2.imshow("Scaled Image", scaled_img)
+cv2.imshow("Translated Image", translated_img)
+
+# Wait for a key press and then close all windows
 cv2.waitKey(0)
 cv2.destroyAllWindows()
