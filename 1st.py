@@ -1,44 +1,39 @@
-#Bresenham's line drawing algorithm
 import matplotlib.pyplot as plt
 
-def draw_line(x0, y0, x1, y1):
-    # Calculate differences
-    dx, dy = abs(x1 - x0), abs(y1 - y0)
-    # Determine the direction of the line
-    sx, sy = (1 if x0 < x1 else -1), (1 if y0 < y1 else -1)
-    # Initialize error term
-    error = dx - dy
-    # Starting point
-    x, y = x0, y0
-    # List to store the points of the line
-    line = []
+def bresenham(x1, y1, x2, y2):
+    points = []
+    dx, dy = abs(x2 - x1), abs(y2 - y1)
+    sx, sy = (1 if x1 < x2 else -1), (1 if y1 < y2 else -1)
+    err = dx - dy
 
-    # Bresenham's line algorithm
     while True:
-        line.append((x, y))  # Add current point to the line
-        if x == x1 and y == y1:  # If end point is reached, break
+        points.append((x1, y1))
+        if x1 == x2 and y1 == y2:
             break
-        e2 = 2 * error
-        if e2 > -dy:  # Adjust error term and position for x direction
-            error -= dy
-            x += sx
-        if e2 < dx:  # Adjust error term and position for y direction
-            error += dx
-            y += sy
+        e2 = err * 2
+        if e2 > -dy:
+            err -= dy
+            x1 += sx
+        if e2 < dx:
+            err += dx
+            y1 += sy
 
-    return line
+    return points
 
-# Example usage: Drawing a line from (1, 1) to (7, 7)
-x0, y0, x1, y1 = 1, 1, 7, 7
-line = draw_line(x0, y0, x1, y1)
+def draw_line(x1, y1, x2, y2):
+    line_points = bresenham(x1, y1, x2, y2)
+    x_coords, y_coords = zip(*line_points)
+    
+    plt.plot(x_coords, y_coords, marker='o', color='blue')
+    plt.title("Bresenham's Line Drawing Algorithm")
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.grid(True)
+    plt.show()
 
-# Extract x and y values from the line points
-x_values, y_values = zip(*line)
+# Define the endpoints
+x1, y1 = 1, 1
+x2, y2 = 5, 5
 
-# Plot the line using matplotlib
-plt.plot(x_values, y_values, marker='o')
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.title('Bresenham Line Drawing')
-plt.grid(True)
-plt.show()
+# Draw the line
+draw_line(x1, y1, x2, y2)
