@@ -1,26 +1,53 @@
-#Operations on 3d object
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-# Define the vertices of a cube
-vertices = [(-1, -1, -1), (1, -1, -1), (1, 1, -1), (-1, 1, -1),
-            (-1, -1, 1), (1, -1, 1), (1, 1, 1), (-1, 1, 1)]
+vertices = (
+    (-1, -1, -1),
+    (1, -1, -1),
+    (1, 1, -1),
+    (-1, 1, -1),
+    (-1, -1, 1),
+    (1, -1, 1),
+    (1, 1, 1),
+    (-1, 1, 1)
+)
 
-# Define the edges of the cube by connecting vertices
-edges = [(0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), 
-         (0, 4), (1, 5), (2, 6), (3, 7)]
+edges = (
+    (0, 1),
+    (1, 2),
+    (2, 3),
+    (3, 0),
+    (4, 5),
+    (5, 6),
+    (6, 7),
+    (7, 4),
+    (0, 4),
+    (1, 5),
+    (2, 6),
+    (3, 7)
+)
 
-# Define the surfaces (or faces) of the cube by connecting vertices
-surfaces = [(0, 1, 2, 3), (3, 2, 6, 7), (7, 6, 5, 4), (4, 5, 1, 0),
-            (1, 5, 6, 2), (4, 0, 3, 7)]
+surfaces = (
+    (0, 1, 2, 3),
+    (3, 2, 6, 7),
+    (7, 6, 5, 4),
+    (4, 5, 1, 0),
+    (1, 5, 6, 2),
+    (4, 0, 3, 7)
+)
 
-# Define colors for each surface of the cube
-colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1), (0, 1, 1)]
+colors = (
+    (1, 0, 0),
+    (0, 1, 0),
+    (0, 0, 1),
+    (1, 1, 0),
+    (1, 0, 1),
+    (0, 1, 1)
+)
 
-def draw_cube():
-    # Draw the cube with colors
+def Cube():
     glBegin(GL_QUADS)
     for i, surface in enumerate(surfaces):
         glColor3fv(colors[i])
@@ -28,48 +55,68 @@ def draw_cube():
             glVertex3fv(vertices[vertex])
     glEnd()
 
-# Initialize Pygame and OpenGL settings
-pygame.init()
-display = (800, 600)
-pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
-glClearColor(1, 1, 1, 1)  # Set background color to white
-glEnable(GL_DEPTH_TEST)  # Enable depth testing for 3D rendering
-gluPerspective(45, display[0] / display[1], 0.1, 50.0)  # Set perspective projection
-glTranslatef(0, 0, -5)  # Move the camera back
+    glBegin(GL_LINES)
+    glColor3f(0, 0, 0)
+    for edge in edges:
+        for vertex in edge:
+            glVertex3fv(vertices[vertex])
+    glEnd()
 
-# Initial transformations
-translate, rotate, scale = [0, 0, 0], [0, 0, 0], 1
+def main():
+    pygame.init()
+    display = (800, 600)
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    glClearColor(1, 1, 1, 1)
 
-# Main loop to handle events and render the cube
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    glEnable(GL_DEPTH_TEST)
+    gluPerspective(45, (display[0] / display[1]), .1, 50.0)
+    glTranslatef(0.0, 0.0, -5)
+    # clock = pygame.time.Clock()
+    translate = [0, 0, 0]
+    rotate = [0, 0, 0]
+    scale = 1
+    running = True
 
-    keys = pygame.key.get_pressed()
-    # Handle input for translations
-    translate[0] += (keys[pygame.K_RIGHT] - keys[pygame.K_LEFT]) * 0.05
-    translate[1] += (keys[pygame.K_UP] - keys[pygame.K_DOWN]) * 0.05
-    # Handle input for rotations
-    rotate[0] += keys[pygame.K_x] * 3
-    rotate[1] += keys[pygame.K_y] * 3
-    rotate[2] += keys[pygame.K_z] * 3
-    # Handle input for scaling
-    scale += (keys[pygame.K_w] - keys[pygame.K_s]) * 0.05
-    scale = max(scale, 0.05)  # Prevent the scale from becoming too small
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    glPushMatrix()
-    # Apply transformations
-    glTranslatef(*translate)
-    glScalef(scale, scale, scale)
-    glRotatef(rotate[0], 1, 0, 0)
-    glRotatef(rotate[1], 0, 1, 0)
-    glRotatef(rotate[2], 0, 0, 1)
-    draw_cube()  # Draw the transformed cube
-    glPopMatrix()
-    pygame.display.flip()
-    pygame.time.wait(30)
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            translate[0] -= 0.05
+        if keys[pygame.K_RIGHT]:
+            translate[0] += 0.05
+        if keys[pygame.K_UP]:
+            translate[1] += 0.05
+        if keys[pygame.K_DOWN]:
+            translate[1] -= 0.05
+        if keys[pygame.K_x]:
+            rotate[0] += 3
+        if keys[pygame.K_z]:
+            rotate[2] += 3
+        if keys[pygame.K_y]:
+            rotate[1] += 3
+        if keys[pygame.K_w]:
+            scale += 0.05
+        if keys[pygame.K_s]:
+            scale -= 0.05
+        if scale < 0.05:
+            scale = .005
 
-pygame.quit()
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glPushMatrix()
+        glTranslatef(*translate)
+        glScalef(scale, scale, scale)
+        glRotatef(rotate[0], 1, 0, 0)
+        glRotatef(rotate[1], 0, 1, 0)
+        glRotatef(rotate[2], 0, 0, 1)
+        Cube()
+        glPopMatrix()
+
+        pygame.display.flip()
+        # clock.tick(70)
+        pygame.time.wait(10)
+
+if __name__ == "__main__":
+    main()
